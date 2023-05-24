@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>main.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="Checkers.html">Checkers</a><ul class='methods'><li data-type='method'><a href="Checkers.html#.awakePawns">awakePawns</a></li><li data-type='method'><a href="Checkers.html#.checkAvailableAttack">checkAvailableAttack</a></li><li data-type='method'><a href="Checkers.html#.defaultBoard">defaultBoard</a></li><li data-type='method'><a href="Checkers.html#.findAttackMoves">findAttackMoves</a></li><li data-type='method'><a href="Checkers.html#.isAttackMove">isAttackMove</a></li><li data-type='method'><a href="Checkers.html#.move">move</a></li><li data-type='method'><a href="Checkers.html#.orientBoard">orientBoard</a></li><li data-type='method'><a href="Checkers.html#.orientPawns">orientPawns</a></li><li data-type='method'><a href="Checkers.html#.reversePos">reversePos</a></li><li data-type='method'><a href="Checkers.html#.whoWon">whoWon</a></li></ul></li><li><a href="T.html">T</a><ul class='methods'><li data-type='method'><a href="T.html#.id2Pos">id2Pos</a></li><li data-type='method'><a href="T.html#.pos2Id">pos2Id</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#awaken">awaken</a></li><li><a href="global.html#boardAttackPawns">boardAttackPawns</a></li><li><a href="global.html#boardFriendlyPawns">boardFriendlyPawns</a></li><li><a href="global.html#checkPos">checkPos</a></li><li><a href="global.html#defaultPlayerBoard">defaultPlayerBoard</a></li><li><a href="global.html#destOnclick">destOnclick</a></li><li><a href="global.html#findFriendlyMoves">findFriendlyMoves</a></li><li><a href="global.html#flip">flip</a></li><li><a href="global.html#nextPly">nextPly</a></li><li><a href="global.html#recursiveAttack">recursiveAttack</a></li><li><a href="global.html#reverseBoard">reverseBoard</a></li><li><a href="global.html#setBottunOnclick">setBottunOnclick</a></li><li><a href="global.html#setTableOnclick">setTableOnclick</a></li><li><a href="global.html#setTdOnclick">setTdOnclick</a></li><li><a href="global.html#start">start</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">main.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import R from "./ramda.js";
+import Checkers from "./checkers.js";
+import Display from "./display.js";
+import T from "./tools.js";
+
+/**
+ * The global board that stores the current state of the game
+ * @typedef {Checkers.Board}
+ */
+let g_board;
+/**
+ * The global ply number that stores the number of plys,
+ * if it is even p0 is playing,
+ * if it is odd p1 is.
+ * @typedef {number}
+ */
+let g_ply = 1; //p0 starts (its as though the previous turn was p1's)
+
+
+/**
+ * After a jump, this code allows for follow up attacks.
+ * @function
+ * @param {HTMLElement} td
+ * @param {Checkers.plyPawns} pawns
+ * @returns {void}
+ */
+function recursiveAttack(td, pawns) {
+    const id = td.id;
+    const [row, column] = T.id2Pos(id);
+    Display.setTdAwake(td, g_board[g_ply % 2][row][column], g_ply);
+
+    let tdPlyPawn = {};
+    tdPlyPawn[id] = pawns[id];
+
+    setTdOnclick(
+        td,
+        tdPlyPawn[id].map(
+            (pos) => document.getElementById(T.pos2Id(pos))
+        ),
+        tdPlyPawn
+    );
+    td.onclick();
+}
+
+/**
+ * unhighlights cells, moves the pawn and initiates the recursive moves
+ * if it applies (the current move is an attack and there is an available
+ * attack).
+ * @function
+ * @param {HTMLElement} td
+ * @param {HTMLElement} dest
+ * @param {HTMLElement[]} tdDestinations
+ * @returns {void}
+ */
+const destOnclick = function (td, dest, tdDestinations) {
+    Display.resetOnclicks();
+
+    tdDestinations.forEach((td) => Display.UnHighlight(td));
+    Display.UnHighlight(td);
+
+    g_board = Checkers.move(
+        T.id2Pos(td.id),
+        T.id2Pos(dest.id),
+        g_board
+    );
+
+    Display.setTableImages(g_board);
+
+    //if the pawn just attacked and hasn't reached the edges of the board
+    //(the pawn can't move after kinging)
+    if (T.id2Pos(dest.id)[1]%7!==0 &amp;&amp; Checkers.isAttackMove(
+        T.id2Pos(td.id), T.id2Pos(dest.id)
+    )) {
+        const [available, pawns] = Checkers.checkAvailableAttack(
+            dest.id, g_board, g_ply
+        );
+        if (available) {
+            recursiveAttack(dest, pawns);
+
+        } else { nextPly(); }
+    } else { nextPly(); }
+};
+
+
+/**
+ * displays the possible destinations of this pawns and sets the onclick events
+ * of those cells
+ * @function
+ * @param {HTMLElement} td
+ * @param {HTMLElement[]} tdDestinations
+ * @param {Checkers.PlyPawns} plyPawns
+ * @returns {void}
+ */
+const setTdOnclick = function (td, tdDestinations, plyPawns) {
+    td.onclick = function () {
+        Display.resetOnclicks();
+
+        tdDestinations.forEach((dest) => Display.highlight(dest));
+
+        Display.highlight(td);
+        tdDestinations.forEach(
+            (dest) => dest.onclick = () => destOnclick(td, dest, tdDestinations)
+        );
+        //deselect
+        td.onclick = function () {
+            Display.resetOnclicks();
+
+            tdDestinations.forEach((td) => Display.UnHighlight(td));
+            Display.UnHighlight(td);
+
+            setTableOnclick(plyPawns);
+        };
+    };
+}
+
+/**
+ * sets onclick events for all active pawns
+ * @function
+ * @param {Checkers.PlyPawns} plyPawns
+ * @returns {void}
+ */
+function setTableOnclick(plyPawns) {
+    for (const [id, positions] of Object.entries(plyPawns)) {
+        setTdOnclick(
+            document.getElementById(id),
+            positions.map(
+                (pos) => document.getElementById(T.pos2Id(pos))
+            ),
+            plyPawns
+        );
+    }
+};
+
+/**
+ * finds and activates pawns that have a playable move
+ * @function
+ * @returns {void}
+ */
+function awaken() {
+    const plyBoard = Checkers.orientBoard(g_board, g_ply);
+    const plyPawns = Checkers.orientPawns(
+        Checkers.awakePawns(plyBoard),
+        g_ply
+    );
+    Display.setTableAwakeImages(plyPawns, g_board, g_ply);
+    setTableOnclick(plyPawns);
+};
+
+/**
+ * Starts the next ply
+ * @function
+ * @returns {void}
+ */
+function nextPly() {
+    const winner = Checkers.whoWon(g_board);
+    console.log(winner);
+    if (winner!==-1){
+        alert(`player${winner} has won`);
+        //display winner
+        //restart on click
+    }
+    g_ply++;
+    awaken();
+}
+
+
+/**
+ * starts the game by creating the table,
+ * then filling the table with images,
+ * then awakens the pawns that have a playable move.
+ * @function
+ * @returns {void}
+ */
+function start() {
+    g_board = Object.freeze(Checkers.defaultBoard());
+/*     g_board = [
+        [[0,1,0,0,0,0,0,0],[0,0,1,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0]],
+        [[0,0,0,0,0,1,0,0],[0,0,0,0,0,0,2,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0]]
+    ] */
+    g_ply = g_ply%2+1;//next player starts the next turn
+
+    document.getElementById("board").innerHTML = Display.boardHTML();
+    Display.setTableImages(g_board);
+    awaken();
+}
+start();
+
+
+
+
+/**
+ * sets the restart and surrender buttons
+ * @function
+ * @returns {void}
+ */
+const setBottunOnclick = function () {
+    Array.from(document.getElementsByClassName("restart")).forEach(
+        (button)=>{button.onclick = start}
+    );
+    document.getElementById("p0Surrender").onclick = ()=>{
+        Display.winner(1);start();};
+    document.getElementById("p1Surrender").onclick = ()=>{
+        Display.winner(0);start();};
+}
+setBottunOnclick();</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Tue May 23 2023 13:48:37 GMT+0100 (British Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>
