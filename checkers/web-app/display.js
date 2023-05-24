@@ -70,8 +70,8 @@ Display.getTable = function () {
  * @property {string} [2] The path to the image file for the king.
  */
 const asleepImages = [
-    ["", "assets/leftAsleep.png", "assets/leftAsleepKing.png"],//p0
-    ["", "assets/rightAsleep.png", "assets/rightAsleepKing.png"]//p1
+    ["", "checkers/web-app/assets/leftAsleep.png", "checkers/web-app/assets/leftAsleepKing.png"],//p0
+    ["", "checkers/web-app/assets/rightAsleep.png", "checkers/web-app/assets/rightAsleepKing.png"]//p1
 ];
 /**
  * sets the asleep image of a given html element based on it's pawn type
@@ -114,8 +114,8 @@ Display.setTableImages = function (board) {
  * @property {string} [2] The path to the image file for the king.
  */
 const awakeImages = [
-    ["", "assets/leftAwake.png", "assets/leftAwakeKing.png"],//p0
-    ["", "assets/rightAwake.png", "assets/rightAwakeKing.png"]//p1
+    ["", "checkers/web-app/assets/leftAwake.png", "checkers/web-app/assets/leftAwakeKing.png"],//p0
+    ["", "checkers/web-app/assets/rightAwake.png", "checkers/web-app/assets/rightAwakeKing.png"]//p1
 ];
 /**
  * sets the awkae image of a given html element based on it's pawn type
@@ -163,7 +163,7 @@ Display.highlight = function (td) {
         img += ",";
     }
 
-    img += "url(assets/highlight.png)";
+    img += "url(checkers/web-app/assets/highlight.png)";
     td.style.backgroundImage = img;
 };
 /**
