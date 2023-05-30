@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="en-gb">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="default.css"> <!-- Import style sheet – default.css -->
+    <link rel="icon" href="assets/favicon.png">
+    <script type="module" src="main.js"></script> <!-- Load the main script. Must be type="module". Have only one of these -->
+    <title>Frog Checkers</title>
+</head>
+<body>
+    <section id="p0" class="playerZone">
+        <h2 class="name">Alexphibian the Great</h2>
+        <img src="assets\p0.png" alt="King Frogxander carrying his children"  class="portrait">
+        <p>
+            He has come a long way in search of a new home for his children.
+            The landslide that had destroyed his pond had been devastating.
+            They have been traveling for days, and they were all exhausted.
+            But Alexphibian the Great was determined to find a new home for his children,
+            a place where they would be safe and happy.
+        </p>
+        <button class="surrender" id="p0Surrender">Surrender</button>
+        <button class="restart" id="p0Restart">Restart</button>
+    </section>
+
+    <section id="p1" class="playerZone">
+        <h2 class="name">Emperor Frogaparte</h2>
+        <img src="assets\p1.png" alt="King Frogaparte and his children" class="portrait">
+        <p>
+            He is a greedy and ambitious frog.
+            He had already amassed 50 ponds to his name, but he was not satisfied.
+            He always wanted more. One day, he came across a particularly lovely pond.
+            It was surrounded by lush green trees and had crystal clear water.
+            Emperor Frogaparte knew that he had to have it.
+        </p>
+        <button class="surrender" id="p1Surrender">Surrender</button>
+        <button class="restart" id="p1Restart">Restart</button>
+    </section>
+
+    <main>
+        <h1 id="gameTitle">Frog Checkers</h1>
+        <h2 id="subTitile">Who will be crowned king?</h2>
+
+        <table id="board"></table>
+    </main>
+
+    <div id="cover">
+        <h1 id="winner"></h1>
+        <h3>Click</h3>
+    </div>
+</body>
+</html>
